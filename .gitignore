@@ -1,0 +1,9 @@
+*pdf
+*aux
+*log
+*out
+*toc
+_minted*/
+*.ini
+*.pyg
+
