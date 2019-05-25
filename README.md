@@ -196,11 +196,7 @@ uint32_t ct_select_u32(uint32_t x, uint32_t y, uint32_t bit)
 }
 ```
 
-<<<<<<< HEAD
-**Note**: The above measures are best effort. C and C++ have the [http://en.cppreference.com/w/cpp/language/as_if as-if rule], which gives the compiler freedom to implement operations in any arbitrary manner, provided the observable behavior (timing is not considered observable behavior in such languages) remains unchanged. Other languages such as [https://github.com/klutzy/nadeko#why Rust] have similar semantics, and thus similar caveats apply. For example, consider the following variant of the above `ct_select_u32`:
-=======
 **Note**: The above measures are best effort: C and C++ have the [as-if rule](http://en.cppreference.com/w/cpp/language/as_if), which gives the compiler freedom to implement operations in any arbitrary manner, provided the observable behavior (timing is not considered observable behavior in such languages) remains unchanged. Other languages such as [Rust](https://github.com/klutzy/nadeko#why) have similar semantics, and thus similar caveats apply. For example, consider the following variant of the above `ct_select_u32`:
->>>>>>> 08674d51ce200f788216e7609a4165736486fc9f
 
 ```C
 uint32_t ct_select_u32(uint32_t x, uint32_t y, _Bool bit)
@@ -363,16 +359,9 @@ To prevent the compiler from "optimizing out" instructions by eliminating them, 
 void * (*volatile memset_volatile)(void *, int, size_t) = memset;
 ```
 
-<<<<<<< HEAD
 Note that such workarounds [may not be sufficient](https://www.daemonology.net/blog/2014-09-05-erratum.html) and can still be optimized out.
 
 C11 introduced `memset_s` with a requirement that it is not optimized out. It's an optional feature that can be requested when including string.h.
-=======
-⚠️ TODO: link to Percival posts
-
-
-C11 introduced `memset_s` with a requirement that it is not optimized out. It's an optional feature that can be requested when including `string.h`.
->>>>>>> 08674d51ce200f788216e7609a4165736486fc9f
 
 ```
 #define __STDC_WANT_LIB_EXT1__ 1
@@ -381,12 +370,6 @@ C11 introduced `memset_s` with a requirement that it is not optimized out. It's 
 memset_s(secret, sizeof(secret), 0, sizeof(secret));
 ```
 
-<<<<<<< HEAD
-
-
-=======
-⚠️ TODO: mention OpenSSL and Windows' equivalents
->>>>>>> 08674d51ce200f788216e7609a4165736486fc9f
 
 ## Prevent confusion between secure and insecure APIs
 
@@ -728,7 +711,7 @@ int randombytes(unsigned char *out, size_t outlen)
 ```
 
 When targeting Windows XP or above, the CryptoAPI above can be bypassed in favor of [RtlGenRandom](http://msdn.microsoft.com/en-us/library/windows/desktop/aa387694%28v=vs.85%29.aspx):
-jk
+
 ```C
 #include <stdint.h>
 #include <stdio.h>
