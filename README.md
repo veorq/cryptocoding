@@ -451,7 +451,6 @@ int do_rsa(struct rsa_key *key, int encrypt, int public, enum rsa_padding_t padd
 
 Assuming that "key" contains the requisite components, this function can be invoked in 16 ways, many of them nonsensical, and several insecure.
 
-⚠️ TODO: broken table, add as picture?
 
 | encrypt | public | padding_type | notes |
 | -- | -- | -- | -- |
