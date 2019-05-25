@@ -453,59 +453,16 @@ Assuming that "key" contains the requisite components, this function can be invo
 
 ⚠️ TODO: broken table, add as picture?
 
-{|
-!encrypt
-!public
-!padding_type
-!notes
-|-
-|0
-|0
-|none
-|style="background-color: red;"|Unpadded decryption. Malleable.
-|-
-|0
-|0
-|pkcs1v15
-|style="background-color: red;"|PKCS1 v1.5 decryption. Probably falls to Bleichenbacher’s attack.
-|-
-|0
-|0
-|oaep
-|style="background-color: green;"|OAEP decryption. Just fine.
-|-
-|0
-|0
-|pss
-|style="background-color: yellow;"|PSS decryption. Eccentric; probably accidental. (secure?)
-|-
-|0
-|1
-|none
-|style="background-color: red;"|Unpadded signature.  Malleable.
-|-
-|0
-|1
-|pkcs1v15
-|style="background-color: yellow;"|PKCS1 v1.5 signature. Okay for some applications, but should use PSS instead.
-|-
-|0
-|1
-|oaep
-|style="background-color: yellow;"|OAEP signature.  Okay for some applications, but should use PSS instead.
-|-
-|0
-|1
-|pss
-|style="background-color: green;"|PSS signature. Great.
-|-
-|...
-|...
-|...
-|as above, but encryption or signature checking.
-
-|-
-|}
+| encrypt | public | padding_type | notes |
+| -- | -- | -- | -- |
+| 0 | 0 | none | ☠: Unpadded decryption. Malleable. |
+| 0 | 0 | pkcs1v15 | ☠: PKCS1 v1.5 decryption. Probably falls to Bleichenbacher’s attack. | 
+| 0 | 0 | oaep | 🔒: OAEP decryption. Just fine. |
+| 0 | 0 | pss | ⚠️: PSS decryption. Eccentric; probably accidental. (secure?) |
+| 0 | 1 | none | ☠: Unpadded signature. Malleable. |
+| 0 | 1 | pkcs1v15 | ⚠️: PKCS1 v1.5 signature. Okay for some applications, but should use PSS instead. | 
+| 0 | 1 | oaep | ⚠️: OAEP signature. May be okay for some applications, but should use PSS instead.  |
+| 0 | 1 | pss | 🔒️: PSS signature. Great. |
 
 Note that only 4 of the 16 ways to call this function are a good idea, 6 of the 16 ways are downright insecure, and the remaining 6 are in some way problematic.  This API is only suitable for use by implementors who understand the ramifications of different RSA padding modes.
 
