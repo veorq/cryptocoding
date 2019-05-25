@@ -7,7 +7,47 @@ Pull requests to improve the current content or add new "rules" are welcome.
 Most of the content comes from the "Crypto coding standard", originally set up by @veorq at cryptocoding.net, and created thanks to many contributors.
 
 
-TODO: say that in languages like Go, JS, or Java, you cant get any guarantee that no copy wont be left in memory
+Table of Contents
+=================
+
+   * [Cryptocoding](#cryptocoding)
+      * [Compare secret strings in constant time](#compare-secret-strings-in-constant-time)
+         * [Problem](#problem)
+         * [Solution](#solution)
+      * [Avoid branchings controlled by secret data](#avoid-branchings-controlled-by-secret-data)
+         * [Problem](#problem-1)
+         * [Solution](#solution-1)
+      * [Avoid table look-ups indexed by secret data](#avoid-table-look-ups-indexed-by-secret-data)
+         * [Problem](#problem-2)
+         * [Solution](#solution-2)
+      * [Avoid secret-dependent loop bounds](#avoid-secret-dependent-loop-bounds)
+         * [Problem](#problem-3)
+         * [Solution](#solution-3)
+      * [Prevent compiler interference with security-critical operations](#prevent-compiler-interference-with-security-critical-operations)
+         * [Problem](#problem-4)
+         * [Solution](#solution-4)
+      * [Prevent confusion between secure and insecure APIs](#prevent-confusion-between-secure-and-insecure-apis)
+         * [Problem](#problem-5)
+         * [Bad Solutions](#bad-solutions)
+         * [Solution](#solution-5)
+      * [Avoid mixing security and abstraction levels of cryptographic primitives in the same API layer](#avoid-mixing-security-and-abstraction-levels-of-cryptographic-primitives-in-the-same-api-layer)
+         * [Problem](#problem-6)
+         * [Solution](#solution-6)
+            * [Provide high-level APIs](#provide-high-level-apis)
+            * [When possible, avoid low-level APIs](#when-possible-avoid-low-level-apis)
+            * [Clearly distinguish high-level APIs and low-level APIs](#clearly-distinguish-high-level-apis-and-low-level-apis)
+      * [Use unsigned bytes to represent binary data](#use-unsigned-bytes-to-represent-binary-data)
+         * [Problem](#problem-7)
+         * [Solution](#solution-7)
+      * [Clean memory of secret data](#clean-memory-of-secret-data)
+         * [Problem](#problem-8)
+         * [Solution](#solution-8)
+      * [Use strong randomness](#use-strong-randomness)
+         * [Problem](#problem-9)
+         * [Bad solutions](#bad-solutions-1)
+         * [Solution](#solution-9)
+
+
 
 
 ## Compare secret strings in constant time
