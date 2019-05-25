@@ -1,8 +1,10 @@
 # Cryptocoding
 
 This page lists "coding rules" for implementations of cryptographic operations, and more generally to for operations involving secret or sensitive values.
-These rules are general recommendations and best practices to write safer code, but may not apply to all languages, may not be up-to-date with respect to the latest version of a language, OS, or library, and of course aren't sufficient to write secure code.
-Pull requests to improve the current content or add new "rules" are welcome.
+
+The rules on this page are general recommendations and best practices to write safer code, but may not apply to all languages, may not be up-to-date with respect to the latest version of a language, OS, or library, and of course aren't sufficient to write secure code.
+It's focused on low-level (read: C) implementations—although we recommend against writing your own C cryptography components. 
+Pull requests to improve the current content or to add new "rules" are welcome.
 
 Most of the content comes from the "Crypto coding standard", originally set up by @veorq at cryptocoding.net, and created thanks to many contributors.
 
