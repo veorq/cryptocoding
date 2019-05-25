@@ -676,7 +676,18 @@ nodevrandom:
 }
 ```
 
-On Windows systems, [CryptGenRandom](http://msdn.microsoft.com/en-us/library/aa379942.aspx) from the Win32 API provides cryptographically secure pseudorandom bytes. Microsoft provides the following usage example:
+On recent Windows platforms, [BCryptGenRandom](https://docs.microsoft.com/en-us/windows/desktop/api/bcrypt/nf-bcrypt-bcryptgenrandom) (nothing to do with the password hash bcrypt) should be used to generate cryptographically secure data. Its interface is straightforward:
+
+```C
+NTSTATUS BCryptGenRandom(
+  BCRYPT_ALG_HANDLE hAlgorithm,
+  PUCHAR            pbBuffer,
+  ULONG             cbBuffer,
+  ULONG             dwFlags
+);
+```
+
+On legacy Windows platforms, [CryptGenRandom](http://msdn.microsoft.com/en-us/library/aa379942.aspx) from the legacy Win32 CryptoAPI provides cryptographically secure pseudorandom bytes. Microsoft provides the following usage example:
 
 ```C
 #include <stddef.h>
