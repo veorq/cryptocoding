@@ -14,10 +14,11 @@ TODO: say that in languages like Go, JS, or Java, you cant get any guarantee tha
 
 ### Problem
 
-String comparisons performed byte-per-byte may be exploited in timing attacks, for example in order to forge MACs (see [http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/ this] [http://codahale.com/a-lesson-in-timing-attacks/ vulnerability] in Google's [https://code.google.com/p/keyczar/ Keyczar] crypto library).
+String comparisons performed byte-per-byte may be exploited in timing attacks, for example in order to forge MACs (see [this](http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/) and [this vulnerability](http://codahale.com/a-lesson-in-timing-attacks/) in Google's [Keyczar crypto library](https://code.google.com/p/keyczar/).
 
 Built-in comparison functions such as C's `memcmp`, Java's `Arrays.equals`, or Python's `==` test typically do not execute in constant time.
-For example, this is [http://research.microsoft.com/en-us/um/redmond/projects/invisible/src/crt/memcmp.c.htm Microsoft CRT]'s implementation of `memcmp`:
+
+For example, this is [Microsoft CRT's](http://research.microsoft.com/en-us/um/redmond/projects/invisible/src/crt/memcmp.c.htm) implementation of `memcmp`:
 <!-- http://stackoverflow.com/questions/5017659/implementing-memcmp -->
 ```C
 EXTERN_C int __cdecl memcmp(const void *Ptr1, const void *Ptr2, size_t Count)
@@ -195,7 +196,11 @@ uint32_t ct_select_u32(uint32_t x, uint32_t y, uint32_t bit)
 }
 ```
 
+<<<<<<< HEAD
 **Note**: The above measures are best effort. C and C++ have the [http://en.cppreference.com/w/cpp/language/as_if as-if rule], which gives the compiler freedom to implement operations in any arbitrary manner, provided the observable behavior (timing is not considered observable behavior in such languages) remains unchanged. Other languages such as [https://github.com/klutzy/nadeko#why Rust] have similar semantics, and thus similar caveats apply. For example, consider the following variant of the above `ct_select_u32`:
+=======
+**Note**: The above measures are best effort: C and C++ have the [as-if rule](http://en.cppreference.com/w/cpp/language/as_if), which gives the compiler freedom to implement operations in any arbitrary manner, provided the observable behavior (timing is not considered observable behavior in such languages) remains unchanged. Other languages such as [Rust](https://github.com/klutzy/nadeko#why) have similar semantics, and thus similar caveats apply. For example, consider the following variant of the above `ct_select_u32`:
+>>>>>>> 08674d51ce200f788216e7609a4165736486fc9f
 
 ```C
 uint32_t ct_select_u32(uint32_t x, uint32_t y, _Bool bit)
@@ -231,7 +236,7 @@ Another example of constant-time source code compiling to variable-time executio
 
 If a conditional branching (`if`, `switch`, `while`, `for`) depends on secret data then the code executed as well as its execution time depend on the secret data as well.
 
-A classical example is the [http://users.belgacom.net/dhem/papers/CG1998_1.pdf timing attack on square-and-multiply] exponentiation algorithms (or double-and-add for multiplication in elliptic curve-based cryptosystems).
+A classical example is the [timing attack on square-and-multiply](http://users.belgacom.net/dhem/papers/CG1998_1.pdf) exponentiation algorithms (or double-and-add for multiplication in elliptic curve-based cryptosystems).
 
 Secret-dependent loop bounds are a special case of this problem.
 
@@ -252,25 +257,25 @@ unsigned select (unsigned a, unsigned b, unsigned bit)
 }
 ```
 
-A possibly faster solution on Intel processors involves the [http://www.jaist.ac.jp/iscenter-new/mpc/altix/altixdata/opt/intel/vtune/doc/users_guide/mergedProjects/analyzer_ec/mergedProjects/reference_olh/mergedProjects/instructions/instruct32_hh/vc35.htm CMOV] conditional move instructions.
+A possibly faster solution on Intel processors involves the [CMOV](http://www.jaist.ac.jp/iscenter-new/mpc/altix/altixdata/opt/intel/vtune/doc/users_guide/mergedProjects/analyzer_ec/mergedProjects/reference_olh/mergedProjects/instructions/instruct32_hh/vc35.htm) conditional move instructions.
 
 ## Avoid table look-ups indexed by secret data
 
 ### Problem
 
-The access time of a table element can vary with its index (depending for example on whether a cache-miss has occured). This has for example been exploited in a series of [[References#AES_cache-timing_attacks_and_defenses|cache-timing attacks]] on AES.
+The access time of a table element can vary with its index (depending for example on whether a cache-miss has occured). This has for example been exploited in a series of cache-timing attacks on AES.
 
 ### Solution
 
-Replace table look-up with sequences of constant-time logical operations, for example by bitslicing look-ups (as used in [http://nacl.cr.yp.to/ NaCl's] [http://eprint.iacr.org/2009/129.pdf implementation] of AES-CTR, or in [https://www.ii.uib.no/~osvik/serpent/ Serpent]).
-For AES, constant-time non-bitsliced implementations are also [http://crypto.stackexchange.com/questions/55/known-methods-for-constant-time-table-free-aes-implementation-using-standard/92#92 possible], but are much slower. 
+Replace table look-up with sequences of constant-time logical operations, for example by bitslicing look-ups (as used in [NaCl's](http://nacl.cr.yp.to/) [implementation](http://eprint.iacr.org/2009/129.pdf) of AES-CTR, or in [Serpent](https://www.ii.uib.no/~osvik/serpent/).
+For AES, constant-time non-bitsliced implementations are also [possible](http://crypto.stackexchange.com/questions/55/known-methods-for-constant-time-table-free-aes-implementation-using-standard/92#92), but are much slower. 
 
 
 ## Avoid secret-dependent loop bounds
 
 ### Problem
 
-Loops with a bound derived from a secret value directly expose a program to timing attacks. For example, a Montgomery ladder implementation in OpenSSL 0.9.8o leaked the logarithm of the (secret) ECDSA nonce, which could be used to [https://eprint.iacr.org/2011/232.pdf steal the private key] of a TLS server. The relevant code is copied below, where `scalar` is the secret nonce, and `scalar->d` a pointer to an array of its bits:
+Loops with a bound derived from a secret value directly expose a program to timing attacks. For example, a Montgomery ladder implementation in OpenSSL 0.9.8o leaked the logarithm of the (secret) ECDSA nonce, which could be used to [steal the private key](https://eprint.iacr.org/2011/232.pdf) of a TLS server. The relevant code is copied below, where `scalar` is the secret nonce, and `scalar->d` a pointer to an array of its bits:
 
 ```C
 /* find top most bit and go one past it */
@@ -309,13 +314,13 @@ for (; i >= 0; i - -)
 
 Make sure that all loops are bounded by a constant (or at least a non-secret variable).
 
-In particular, make sure, as far as possible, that loop bounds and their potential underflow or overflow are independent of user-controlled input (you may have heard of the [http://heartbleed.com/ Heartbleed bug]).
+In particular, make sure, as far as possible, that loop bounds and their potential underflow or overflow are independent of user-controlled input (you may have heard of the [Heartbleed bug](http://heartbleed.com/)).
 
 ## Prevent compiler interference with security-critical operations
 
 ### Problem
 
-Some compilers will optimize out operations they deem useless. For example, MS Visual C++ 2010 suppressed the `memset` in the following code fragment from the [https://www.torproject.org/ Tor] anonymity network:
+Some compilers will optimize out operations they deem useless. For example, MS Visual C++ 2010 suppressed the `memset` in the following code fragment from the [Tor](https://www.torproject.org/) anonymity network:
 
 ```C
 int
@@ -328,12 +333,14 @@ crypto_pk_private_sign_digest(...)
 }
 ```
 
-However the role of this `memset` is to clear the buffer `digest` off of [http://www.viva64.com/en/b/0178/ secret data] so that any subsequent (erroneous, undefined!) reads of uninitialized stack will learn no secret information.
+However the role of this `memset` is to clear the buffer `digest` off of [secret data](http://www.viva64.com/en/b/0178/) so that any subsequent (erroneous, undefined!) reads of uninitialized stack will learn no secret information.
 
-Some compilers infer that they can eliminate checks based on erroneous code elsewhere in the program.  For example, when encountering
+Some compilers infer that they can eliminate checks based on erroneous code elsewhere in the program.
+
+For example, when encountering
 
 ```C
-  call_fn(ptr); // always derereferences ptr.
+  call_fn(ptr); // always dereferences ptr.
 
   // many lines here
 
@@ -344,21 +351,28 @@ some compilers will decide that `ptr == NULL` must always be false, since otherw
 
 ### Solution
 
-Look at the assembly code produced and check that all instructions are there.  (This will not be possible for typical application sizes, but should be considered for security-sensitive code.)
+Look at the assembly code produced and check that all instructions are there. (This will not be possible for typical application sizes, but should be considered for security-sensitive code.)
 
-Know what optimizations your compiler can do, and carefully consider the effect of each one on security programming patterns.  In particular, be careful of optimizations that can remove code or branches, and code that prevents errors which "should be impossible" if the rest of the program is correct.
+Know what optimizations your compiler can do, and carefully consider the effect of each one on security programming patterns. In particular, be careful of optimizations that can remove code or branches, and code that prevents errors which "should be impossible" if the rest of the program is correct.
 
 When possible, consider disabling compiler optimizations that can eliminate or weaken security checks.
 
-To prevent the compiler from "optimizing out" instructions by eliminating them, a function may be redefined as a volatile pointer to force the function pointer dereference. This is for example used in [https://github.com/nmathewson/libottery/ libottery] by redefining `memset` to
+To prevent the compiler from "optimizing out" instructions by eliminating them, a function may be redefined as a volatile pointer to force the function pointer dereference. This is for example used in [libottery](https://github.com/nmathewson/libottery/) by redefining `memset` to
 
 ```C
 void * (*volatile memset_volatile)(void *, int, size_t) = memset;
 ```
 
+<<<<<<< HEAD
 Note that such workarounds [may not be sufficient](https://www.daemonology.net/blog/2014-09-05-erratum.html) and can still be optimized out.
 
 C11 introduced `memset_s` with a requirement that it is not optimized out. It's an optional feature that can be requested when including string.h.
+=======
+⚠️ TODO: link to Percival posts
+
+
+C11 introduced `memset_s` with a requirement that it is not optimized out. It's an optional feature that can be requested when including `string.h`.
+>>>>>>> 08674d51ce200f788216e7609a4165736486fc9f
 
 ```
 #define __STDC_WANT_LIB_EXT1__ 1
@@ -367,8 +381,12 @@ C11 introduced `memset_s` with a requirement that it is not optimized out. It's 
 memset_s(secret, sizeof(secret), 0, sizeof(secret));
 ```
 
+<<<<<<< HEAD
 
 
+=======
+⚠️ TODO: mention OpenSSL and Windows' equivalents
+>>>>>>> 08674d51ce200f788216e7609a4165736486fc9f
 
 ## Prevent confusion between secure and insecure APIs
 
@@ -380,16 +398,16 @@ Pseudorandom number generators frequently have this problem: OpenSSL has `RAND_b
 For another example, even on systems that provide a constant-time function to compare two byte strings of a given length, there invariably exist fast-exit variants.
 
 ### Bad Solutions
-Sometimes a function is safe on some platforms but dangerous on others.  In these cases, some programmers use the function, believing that their code will only run on platforms where it is safe.  This is a bad idea, since when the code is ported to a different platform, it may become insecure without anyone realizing.
+Sometimes a function is safe on some platforms but dangerous on others. In these cases, some programmers use the function, believing that their code will only run on platforms where it is safe. This is a bad idea, since when the code is ported to a different platform, it may become insecure without anyone realizing.
 
-On systems that permit applications to override platform-provided functions, some programmers override insecure functions with secure ones, and then write their programs to use the API that would ordinarily be insecure.  This is a questionable idea on its own, since it results in the programmer writing insecure-looking code.  Further, if the overriding method ever fails (or is itself re-overridden), the program will become insecure without the new insecurity being detected.  Finally, it can result in programs whose pieces become insecure if they are ever copied into another program.
+On systems that permit applications to override platform-provided functions, some programmers override insecure functions with secure ones, and then write their programs to use the API that would ordinarily be insecure. This is a questionable idea on its own, since it results in the programmer writing insecure-looking code. Further, if the overriding method ever fails (or is itself re-overridden), the program will become insecure without the new insecurity being detected. Finally, it can result in programs whose pieces become insecure if they are ever copied into another program.
 
 ### Solution
-When possible, do not include insecure variants of secure functions.  For example, a PRNG based on a well-seeded secure stream cipher is generally fast enough for most applications.  A data-independent memcmp replacement is fast enough to replace nearly all uses of `memcmp`.
+When possible, do not include insecure variants of secure functions. For example, a PRNG based on a well-seeded secure stream cipher is generally fast enough for most applications. A data-independent memcmp replacement is fast enough to replace nearly all uses of `memcmp`.
 
-If you can't remove an insecure function, override it with a variant that produces a compile-time error, or use a code-scanning tool to detect and warn about its use.  If you can override a insecure function with a secure variant, you may do so, but for safety in depth, never call the insecure API, and make sure that you can detect its use.
+If you can't remove an insecure function, override it with a variant that produces a compile-time error, or use a code-scanning tool to detect and warn about its use. If you can override a insecure function with a secure variant, you may do so, but for safety in depth, never call the insecure API, and make sure that you can detect its use.
 
-If you must retain both a secure and an insecure version of a given function, make sure that the names of the functions are distinctive in a way that makes it hard to accidentally use an insecure variant.  For example, if you must have a secure and an insecure PRNG, don't name the insecure one "Random" or "FastRandom" or "MersenneTwister" or "LCGRand" -- instead, name it something like "InsecureRandom." The spelling for "Insecure" should never be ""; design your APIs so that using an insecure function is always a bit scary.
+If you must retain both a secure and an insecure version of a given function, make sure that the names of the functions are distinctive in a way that makes it hard to accidentally use an insecure variant. For example, if you must have a secure and an insecure PRNG, don't name the insecure one "Random" or "FastRandom" or "MersenneTwister" or "LCGRand" -- instead, name it something like "InsecureRandom." The spelling for "Insecure" should never be ""; design your APIs so that using an insecure function is always a bit scary.
 
 When your platform provides an insecure function variant without a name that implies it is insecure, and you can't remove the function, give it a wrapper with a safe name, then use a code-scanning tool to detect and warn about all calls to the unsafe name.
 
@@ -409,6 +427,8 @@ int do_rsa(struct rsa_key *key, int encrypt, int public, enum rsa_padding_t padd
 ```
 
 Assuming that "key" contains the requisite components, this function can be invoked in 16 ways, many of them nonsensical, and several insecure.
+
+⚠️ TODO: broken table, add as picture?
 
 {|
 !encrypt
@@ -470,22 +490,26 @@ Now imagine that we add APIs for block cipher encryption in various modes, for r
 
 ### Solution
 
-'''Provide high-level APIs.''' For example, provide a set of hybrid-encrypt-and-authenticate functions that use only safe algorithms, safely.  If writing a function that allows multiple combinations of public-key and secret-key algorithms and modes, ensure that it rejects insecure algorithms and insecure combinations of algorithms.
+#### Provide high-level APIs
+For example, provide a set of hybrid-encrypt-and-authenticate functions that use only safe algorithms, safely. If writing a function that allows multiple combinations of public-key and secret-key algorithms and modes, ensure that it rejects insecure algorithms and insecure combinations of algorithms.
 
-'''When possible, avoid low-level APIs.''' For nearly all users, there is no need to ever use unpadded RSA, or to use a block cipher in ECB mode, or to perform a DSA signature with a user-selected nonce.  These functions ''can'' be used as building-blocks to make something secure -- for example, by doing OAEP padding before calling  unpadded RSA, or doing ECB on the sequence of blocks [1, 2, 3] in order to produce a counter mode stream, or by using a random or unpredictable byte-sequence to produce the DSA nonce -- but experience suggest that they will be misused more frequently than they are used correctly.
+#### When possible, avoid low-level APIs
+For nearly all users, there is no need to ever use unpadded RSA, or to use a block cipher in ECB mode, or to perform a DSA signature with a user-selected nonce. These functions ''can'' be used as building-blocks to make something secure -- for example, by doing OAEP padding before calling  unpadded RSA, or doing ECB on the sequence of blocks [1, 2, 3] in order to produce a counter mode stream, or by using a random or unpredictable byte-sequence to produce the DSA nonce -- but experience suggest that they will be misused more frequently than they are used correctly.
 
-Some other primitives are necessary for implementing certain protocols, but unlikely to be a good first choice for implementing new protocols.  For example, you can't implement browser-compatible TLS nowadays without CBC, PKCS1 v1.5, and RC4, but none of these would be a great .
+Some other primitives are necessary for implementing certain protocols, but unlikely to be a good first choice for implementing new protocols. For example, you can't implement browser-compatible TLS nowadays without CBC, PKCS1 v1.5, and RC4, but none of these would be a great.
 
-If you are providing a crypto implementation for use by inexperienced programmers, it may be best to omit these functions entirely, and choose only functions that implement well-specified, high-level, secure operations.  But if you must provide an implementation for use by experienced and inexperienced programmers alike...
+If you are providing a crypto implementation for use by inexperienced programmers, it may be best to omit these functions entirely, and choose only functions that implement well-specified, high-level, secure operations. But if you must provide an implementation for use by experienced and inexperienced programmers alike...
 
-'''Clearly distinguish high-level APIs and low-level APIs.''' "Encrypt securely" should not be the same function as "encrypt incorrectly" with slightly different arguments.  In languages that divide functions and types into packages or headers, safe and unsafe crypto should not occupy the same packages/headers.  In languages with subtyping, there should be a separate type for safe crypto.
+#### Clearly distinguish high-level APIs and low-level APIs
+"Encrypt securely" should not be the same function as "encrypt incorrectly" with slightly different arguments. In languages that divide functions and types into packages or headers, safe and unsafe crypto should not occupy the same packages/headers. In languages with subtyping, there should be a separate type for safe crypto.
+
 <!-- give example of AES-CBC in OpenSSL: low-level vs EVP API... -->
 
 
 ## Use unsigned bytes to represent binary data
 
 ### Problem
-Some languages in the C family have separate signed and unsigned integer types.  For C in particular, the signedness of the type `char` is implementation-defined.  This can lead to problematic code such as:
+Some languages in the C family have separate signed and unsigned integer types. For C in particular, the signedness of the type `char` is implementation-defined. This can lead to problematic code such as:
 
 ```C
 int decrypt_data(const char *key, char *bytes, size_t len);
@@ -504,7 +528,7 @@ void fn(...) {
 }
 ```
 
-If the `char` type is unsigned, this code behaves as expected.  But when `char` is signed, `buf[0]` may be negative, leading to a very large argument for `malloc` and `memcpy`, and a heap corruption opportunity when we try to set the last character of name to 0.  Worse, if `buf[0]` is 255, then name_len will be -1.  So we will allocate a 0-byte buffer, but then perform a `(size_t)-1 memcpy` into that buffer, thus stomping the heap.
+If the `char` type is unsigned, this code behaves as expected. But when `char` is signed, `buf[0]` may be negative, leading to a very large argument for `malloc` and `memcpy`, and a heap corruption opportunity when we try to set the last character of name to `0`. Worse, if `buf[0]` is `255`, then `name_len` will be `-1`. So we will allocate a 0-byte buffer, but then perform a `(size_t)-1 memcpy` into that buffer, thus stomping the heap.
 
 ### Solution
 
@@ -535,13 +559,26 @@ void burn( void *v, size_t n )
 }
 ```
 
-Note however that there's virtually no way to reliably clean secret data in garbage-collected languages (such as Go, Java, or JavaScript), nor in language with immutable strings (such as Swift or Objective C).
+Unfortunately, there's virtually no way to reliably clean secret data in garbage-collected languages (such as Go, Java, or JavaScript), nor in language with immutable strings (such as Swift or Objective-C).
+Let's see for example why it's preferable to use `bytes` for secrets in Objective-C:
 
+```objc
+// NSDictionary <passwordUniqueIdentifier, passwordKey>
+@property (nonatomic, strong) NSMutableDictionary <NSString *, NSMutableData *> *passwordsCache;
+
+...
+
+// clean up values
+[self.passwordsCache enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSMutableData * _Nonnull data, BOOL * _Nonnull stop) {
+    [data resetBytesInRange:NSMakeRange(0, [data length])];
+}];
+[self.passwordsCache removeAllObjects];
+```
 
 ## Use strong randomness
 
 ### Problem
-Many cryptographic systems require sources of random numbers, and fail with even slight deviations from randomness. For example, leaking just one bit of each random number in the DSA will reveal a private key astonishingly quickly. Lack of randomness can be surprisingly hard to diagnose: the Debian random number generator [http://www.debian.org/security/2008/dsa-1571 failure] in OpenSSL went unnoticed for 2 years, compromising a vast number of keys. The requirements on random numbers for cryptographic purposes are very stringent: most pseudorandom number generators (PRNG) fail to meet them.
+Many cryptographic systems require sources of random numbers, and fail with even slight deviations from randomness. For example, leaking just one bit of each random number in the DSA will reveal a private key astonishingly quickly. Lack of randomness can be surprisingly hard to diagnose: the Debian random number generator [failure](http://www.debian.org/security/2008/dsa-1571) in OpenSSL went unnoticed for 2 years, compromising a vast number of keys. The requirements on random numbers for cryptographic purposes are very stringent: most pseudorandom number generators (PRNG) fail to meet them.
 
 ### Bad solutions
 
@@ -549,23 +586,24 @@ For cryptographic applications,
 
 * Do not rely only on predictable entropy source like timestamps, PIDs, temperature sensors, etc.
 * Do not rely only on general-purpose pseudorandom functions like `stdlib`'s `rand()`, `srand()`, `random()`, or Python's `random` module.
-* Do not use [http://crypto.di.uoa.gr/CRYPTO.SEC/Randomness_Attacks.html Mersenne Twister].
+* Do not use [Mersenne Twister](http://crypto.di.uoa.gr/CRYPTO.SEC/Randomness_Attacks.html).
 * Do not use things like http://www.random.org/ (the random data may be shared with and available to other parties).
 * Do not design your own PRNG, even if it's based on a secure cryptographic primitive (unless you know what you're doing).
 * Do not reuse the same randomness accross applications to "save" random numbers.
-* Do not conclude that a PRNG is secure just because it passes the [http://www.stat.fsu.edu/pub/diehard/ Diehard] tests or [http://csrc.nist.gov/groups/ST/toolkit/rng/stats_tests.html NIST's] tests.
-* Do not assume that a cryptographically secure PRNG necessarily provides forward or backward secrecy (aka [http://csrc.nist.gov/publications/nistpubs/800-90A/SP800-90A.pdf backtracking resistance and prediction resistance]), would the internal state leak to an attacker.
+* Do not conclude that a PRNG is secure just because it passes the [Diehard](http://www.stat.fsu.edu/pub/diehard/) tests or [NIST's tests](http://csrc.nist.gov/groups/ST/toolkit/rng/stats_tests.html).
+* Do not assume that a cryptographically secure PRNG necessarily provides forward or backward secrecy (aka [backtracking resistance and prediction resistance](http://csrc.nist.gov/publications/nistpubs/800-90A/SP800-90A.pdf), would the internal state leak to an attacker.
 * Do not directly use "entropy" as pseudorandom data (entropy from analog sources is often biased, that is, N bits from an entropy pool often provide less than N bits of entropy).
 
 ### Solution
-Minimize the need for randomness through design and choice of primitives (for example [http://ed25519.cr.yp.to/ Ed25519] produces signatures deterministically).
+Minimize the need for randomness through design and choice of primitives (for example [Ed25519](http://ed25519.cr.yp.to/) produces signatures deterministically).
+
 When generating random bytes use operating-system provided sources guaranteed to meet cryptographic requirements like `/dev/random`. On constrained platforms consider adding analog sources of noise and mixing them well.
 
-Do [http://jbp.io/2014/01/16/openssl-rand-api/ check the return values] of your RNG, to make sure that the random bytes are as strong as they should be, and they have been written successfully.
+Do [check the return values](http://jbp.io/2014/01/16/openssl-rand-api/) of your RNG, to make sure that the random bytes are as strong as they should be, and they have been written successfully.
 
-Follow the recommendations from Nadia Heninger et al. in Section 7 of their [https://factorable.net/weakkeys12.extended.pdf Mining Your Ps and Qs] paper.
+Follow the recommendations from Nadia Heninger et al. in Section 7 of their [Mining Your Ps and Qs](https://factorable.net/weakkeys12.extended.pdf) paper.
 
-On Intel CPUs based on the Ivy Bridge microarchitecture (and future generations), the [http://software.intel.com/en-us/articles/intel-digital-random-number-generator-drng-software-implementation-guide built-in PRNG] guarantees high entropy and throughput.
+On Intel CPUs based on the Ivy Bridge microarchitecture (and future generations), the [built-in PRNG](http://software.intel.com/en-us/articles/intel-digital-random-number-generator-drng-software-implementation-guide) guarantees high entropy and throughput.
 
 On Unix systems, you should generally use `/dev/random` or `/dev/urandom`. However the former is "blocking", meaning that it won't return any data when it deems that its entropy pool contains insufficient entropy. This feature limits its usability, and is the reason why `/dev/urandom` is more often used. Extracting a random number from `/dev/urandom` can be as simple as
 
@@ -597,7 +635,7 @@ int main() {
 }
 ```
 
-However, this simple program may not be sufficient for secure randomness generation in your environment: it is safer to perform additional error checks, as found in [http://libressl.org LibreSSL]'s `getentropy_urandom` function:
+However, this simple program may not be sufficient for secure randomness generation in your environment: it is safer to perform additional error checks, as found in [LibreSSL](http://libressl.org)'s `getentropy_urandom` function:
 
 ```C
 static int
@@ -659,7 +697,7 @@ nodevrandom:
 }
 ```
 
-On Windows systems, [http://msdn.microsoft.com/en-us/library/aa379942.aspx `CryptGenRandom`] from the Win32 API provides cryptographically secure pseudorandom bytes. Microsoft provides the following usage example:
+On Windows systems, [CryptGenRandom](http://msdn.microsoft.com/en-us/library/aa379942.aspx) from the Win32 API provides cryptographically secure pseudorandom bytes. Microsoft provides the following usage example:
 
 ```C
 #include <stddef.h>
@@ -689,8 +727,8 @@ int randombytes(unsigned char *out, size_t outlen)
 }
 ```
 
-When targeting Windows XP or above, the CryptoAPI above can be bypassed in favor of [http://msdn.microsoft.com/en-us/library/windows/desktop/aa387694%28v=vs.85%29.aspx `RtlGenRandom`]:
-
+When targeting Windows XP or above, the CryptoAPI above can be bypassed in favor of [RtlGenRandom](http://msdn.microsoft.com/en-us/library/windows/desktop/aa387694%28v=vs.85%29.aspx):
+jk
 ```C
 #include <stdint.h>
 #include <stdio.h>
