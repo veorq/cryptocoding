@@ -1,6 +1,13 @@
-# Cryptocoding 
+# Cryptocoding
 
-This page lists coding rules with for each a description of the problem addressed (with a concrete example of failure), and then one or more solutions (with example code snippets).
+This page lists "coding rules" for implementations of cryptographic operations, and more generally to for operations involving secret or sensitive values.
+These rules are general recommendations and best practices to write safer code, but may not apply to all languages, may not be up-to-date with respect to the latest version of a language, OS, or library, and of course aren't sufficient to write secure code.
+Pull requests to improve the current content or add new "rules" are welcome.
+
+Most of the content comes from the "Crypto coding standard", originally set up by @veorq at cryptocoding.net, and created thanks to many contributors.
+
+
+TODO: say that in languages like Go, JS, or Java, you cant get any guarantee that no copy wont be left in memory
 
 
 ## Compare secret strings in constant time
@@ -26,6 +33,8 @@ EXTERN_C int __cdecl memcmp(const void *Ptr1, const void *Ptr2, size_t Count)
     return v;
 }
 ```
+
+The risk is greater on legacy platforms, as they are more likely to perform byte-wise comparisons.
 
 ### Solution
 
@@ -81,7 +90,7 @@ int util_cmp_const(const void * a, const void *b, const size_t size)
 }
 ```
 
-Examples of constant-time tests and comparisons for 32-bit values:
+Examples of constant-time tests and comparisons for 32-bit values, [by @sneves](https://gist.github.com/sneves/10845247):
 
 ```C
 #include <stdint.h>
@@ -186,7 +195,7 @@ uint32_t ct_select_u32(uint32_t x, uint32_t y, uint32_t bit)
 }
 ```
 
-**Note**: The above measures are best effort: C and C++ have the [http://en.cppreference.com/w/cpp/language/as_if as-if rule], which gives the compiler freedom to implement operations in any arbitrary manner, provided the observable behavior (timing is not considered observable behavior in such languages) remains unchanged. Other languages such as [https://github.com/klutzy/nadeko#why Rust] have similar semantics, and thus similar caveats apply. For example, consider the following variant of the above ct_select_u32:
+**Note**: The above measures are best effort. C and C++ have the [http://en.cppreference.com/w/cpp/language/as_if as-if rule], which gives the compiler freedom to implement operations in any arbitrary manner, provided the observable behavior (timing is not considered observable behavior in such languages) remains unchanged. Other languages such as [https://github.com/klutzy/nadeko#why Rust] have similar semantics, and thus similar caveats apply. For example, consider the following variant of the above `ct_select_u32`:
 
 ```C
 uint32_t ct_select_u32(uint32_t x, uint32_t y, _Bool bit)
@@ -196,7 +205,7 @@ uint32_t ct_select_u32(uint32_t x, uint32_t y, _Bool bit)
 }
 ```
 
-When compiled with `clang-3.5 -O2 -m32 -march=i386, the result is 
+When compiled with `clang-3.5 -O2 -m32 -march=i386`, the result is 
 
 ```asm
 ct_select_u32:                          
@@ -213,6 +222,8 @@ ct_select_u32:
 ```
 
 Due to branch predictor stalls, this potentially reveals the chosen value via a timing side-channel. Since compilers have essentially unlimited freedom to generate variable-time code, it is important to check the output assembly to verify that it is, indeed, constant-time.
+
+Another example of constant-time source code compiling to variable-time execution was observed with [Curve25519 built with MSCV 2015](https://infoscience.epfl.ch/record/223794/files/32_1.pdf).
 
 ## Avoid branchings controlled by secret data
 
@@ -345,10 +356,9 @@ To prevent the compiler from "optimizing out" instructions by eliminating them, 
 void * (*volatile memset_volatile)(void *, int, size_t) = memset;
 ```
 
-TODO: link to Percival posts
+Note that such workarounds [may not be sufficient](https://www.daemonology.net/blog/2014-09-05-erratum.html) and can still be optimized out.
 
-
-C11 introduced memset_s with a requirement that it is not optimized out. It's an optional feature that can be requested when including string.h.
+C11 introduced `memset_s` with a requirement that it is not optimized out. It's an optional feature that can be requested when including string.h.
 
 ```
 #define __STDC_WANT_LIB_EXT1__ 1
@@ -357,7 +367,8 @@ C11 introduced memset_s with a requirement that it is not optimized out. It's an
 memset_s(secret, sizeof(secret), 0, sizeof(secret));
 ```
 
-TODO: mention OpenSSL and Windows' equivalents
+
+
 
 ## Prevent confusion between secure and insecure APIs
 
@@ -500,31 +511,16 @@ If the `char` type is unsigned, this code behaves as expected.  But when `char` 
 In languages with signed and unsigned byte types, implementations should always use the unsigned byte type to represent bytestrings in their APIs.
 
 
-## Use separate types for secret and non-secret information
-
-### Problem
-todo: "keypair" and "public key" shouldn't be the same type.
-
-todo: in dynamically typed languages (python, ruby, etc), "encode public key to string" and "encode private key to string" shouldn't have the same method name.
-
-### Solution
-
-
-## Use separate types for different types of information
-
-### Problem
-TODO: "16-byte key" and "16-byte IV" shouldn't be the same type.
-
-### Solution
-
-
 ## Clean memory of secret data
 
 ### Problem
+
 On most operating systems memory owned by one process can be reused by another without being cleared, either because the first process terminates or it gives back the memory to the system. If the memory
 contains secret keys these will be available to the second process, which increases the exposure of the key. On multiuser systems this can make it possible to sniff keys from other users.  Even within a single
 system the increased exposure can cause previously harmless vulnerabilities to expose secret material.
+
 ### Solution
+
 Clear all variables containing secret data before they go out of scope. Worry about `mmap()`: executing `munmap()` causes memory to go out of scope immediately, while erasing while the mapping exists will destroy the file.
 
 For clearing memory or destroying objects that are about to go out of scope, use a platform-specific memory-wipe function where available, such as `SecureZeroMemory()` on win32, or `OPENSSL_cleanse()` on OpenSSL.
@@ -538,6 +534,8 @@ void burn( void *v, size_t n )
   while( n-- ) *p++ = 0;
 }
 ```
+
+Note however that there's virtually no way to reliably clean secret data in garbage-collected languages (such as Go, Java, or JavaScript), nor in language with immutable strings (such as Swift or Objective C).
 
 
 ## Use strong randomness
@@ -571,7 +569,7 @@ On Intel CPUs based on the Ivy Bridge microarchitecture (and future generations)
 
 On Unix systems, you should generally use `/dev/random` or `/dev/urandom`. However the former is "blocking", meaning that it won't return any data when it deems that its entropy pool contains insufficient entropy. This feature limits its usability, and is the reason why `/dev/urandom` is more often used. Extracting a random number from `/dev/urandom` can be as simple as
 
-```
+```C
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
