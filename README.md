@@ -1,6 +1,6 @@
 # Cryptocoding
 
-This page lists "coding rules" for implementations of cryptographic operations, and more generally to for operations involving secret or sensitive values.
+This page lists "coding rules" for implementations of cryptographic operations, and more generally for operations involving secret or sensitive values.
 
 The rules on this page are general recommendations and best practices to write safer code, but may not apply to all languages, may not be up-to-date with respect to the latest version of a language, OS, or library, and of course aren't sufficient to write secure code.
 It's focused on low-level (read: C) implementations—although we recommend against writing your own C cryptography components. 
@@ -58,7 +58,7 @@ Table of Contents
 
 String comparisons performed byte-per-byte may be exploited in timing attacks, for example in order to forge MACs (see [this](http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/) and [this vulnerability](http://codahale.com/a-lesson-in-timing-attacks/) in Google's [Keyczar crypto library](https://code.google.com/p/keyczar/).
 
-Built-in comparison functions such as C's `memcmp`, Java's `Arrays.equals`, or Python's `==` test typically do not execute in constant time.
+Built-in comparison functions such as C's `memcmp`, Java's `Arrays.equals`, or Python's `==` test may not execute in constant time.
 
 For example, this is [Microsoft CRT's](http://research.microsoft.com/en-us/um/redmond/projects/invisible/src/crt/memcmp.c.htm) implementation of `memcmp`:
 <!-- http://stackoverflow.com/questions/5017659/implementing-memcmp -->
@@ -77,7 +77,7 @@ EXTERN_C int __cdecl memcmp(const void *Ptr1, const void *Ptr2, size_t Count)
 }
 ```
 
-The risk is greater on legacy platforms, as they are more likely to perform byte-wise comparisons.
+The risk is greater on legacy platforms and on embedded platform, as they are more likely to perform byte-wise comparisons.
 
 ### Solution
 
