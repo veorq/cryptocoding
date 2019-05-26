@@ -581,11 +581,11 @@ Minimize the need for randomness through design and choice of primitives (for ex
 On Linux, use the [`getrandom()`](http://man7.org/linux/man-pages/man2/getrandom.2.html) system call, which ensures that the underlying PRNG has a high enough level entropy but will not "block" afterwards.
 On OpenBSD, use [`getentropy()`](https://man.openbsd.org/getentropy.2), which has a similar behavior and predates Linux' syscall.
 
-The OpenSSL API offers [`RAND_bytes()`](https://www.openssl.org/docs/man1.0.2/man3/RAND_bytes.html), which behaves differently depending on the platform and attempts to use reliable source of entropy when available. For example, on a Unix platform it would use `/dev/urandom/` and the RDRAND/RDSEED instructions, if available, among others.
+The OpenSSL API offers [`RAND_bytes()`](https://www.openssl.org/docs/man1.0.2/man3/RAND_bytes.html), which behaves differently depending on the platform and attempts to use reliable source of entropy when available. For example, on a Unix platform it would use `/dev/urandom` and the RDRAND/RDSEED instructions, if available, among others.
 
 When generating random bytes use operating-system provided sources guaranteed to meet cryptographic requirements like `/dev/random`. On constrained platforms consider adding analog sources of noise and mixing them well.
 
-Do [check the return values](http://jbp.io/2014/01/16/openssl-rand-api/) of your RNG, to make sure that the random bytes are as strong as they should be, and they have been written successfully.
+Do [check the return values](http://jbp.io/2014/01/16/openssl-rand-api) of your RNG, to make sure that the random bytes are as strong as they should be, and they have been written successfully.
 
 Follow the recommendations from Nadia Heninger et al. in Section 7 of their [Mining Your Ps and Qs](https://factorable.net/weakkeys12.extended.pdf) paper.
 
