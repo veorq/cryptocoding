@@ -56,24 +56,25 @@ Table of Contents
 
 ### Problem
 
-String comparisons performed byte-per-byte may be exploited in timing attacks, for example in order to forge MACs (see [this](http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/) and [this vulnerability](http://codahale.com/a-lesson-in-timing-attacks/) in Google's [Keyczar crypto library](https://code.google.com/p/keyczar/).
+String comparisons performed byte-per-byte may be exploited in timing attacks, for example in order to forge MACs (see [this](http://rdist.root.org/2009/05/28/timing-attack-in-google-keyczar-library/) and [this vulnerability](http://codahale.com/a-lesson-in-timing-attacks/) in Google's [Keyczar crypto library](https://code.google.com/p/keyczar/)).
 
 Built-in comparison functions such as C's `memcmp`, Java's `Arrays.equals`, or Python's `==` test may not execute in constant time.
 
-For example, this is [Microsoft CRT's](http://research.microsoft.com/en-us/um/redmond/projects/invisible/src/crt/memcmp.c.htm) implementation of `memcmp`:
+For example, this is [OpenBSD libc](https://cvsweb.openbsd.org/cgi-bin/cvsweb/src/lib/libc/string/memcmp.c?rev=1.6&content-type=text/x-cvsweb-markup) implementation of `memcmp`:
 <!-- http://stackoverflow.com/questions/5017659/implementing-memcmp -->
 ```C
-EXTERN_C int __cdecl memcmp(const void *Ptr1, const void *Ptr2, size_t Count)
+int
+memcmp(const void *s1, const void *s2, size_t n)
 {
-    INT v = 0;
-    BYTE *p1 = (BYTE *)Ptr1;
-    BYTE *p2 = (BYTE *)Ptr2;
+	if (n != 0) {
+		const unsigned char *p1 = s1, *p2 = s2;
 
-    while(Count-- > 0 && v == 0) {
-        v = *(p1++) - *(p2++);
-    }
-
-    return v;
+		do {
+			if (*p1++ != *p2++)
+				return (*--p1 - *--p2);
+		} while (--n != 0);
+	}
+	return (0);
 }
 ```
 
