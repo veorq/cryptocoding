@@ -291,7 +291,7 @@ Timing leaks may be mitigated by introducing dummy operations in branches of the
 /* Equivalent to: return bit ? a : b */
 unsigned select (unsigned a, unsigned b, unsigned bit)
 {
-        unsigned isnonzero = (bit | -bit) >> (sizeof(unsigned) * 8 - 1);
+        unsigned isnonzero = (bit | -bit) >> (sizeof(unsigned) * CHAR_BIT - 1);
         /* -0 = 0, -1 = 0xff....ff */
         unsigned mask = -isnonzero;
         unsigned ret = mask & (b^a);
