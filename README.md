@@ -88,10 +88,10 @@ Use a constant-time comparison function:
 * In Java, use `java.security.MessageDigest.isEqual`
 * In Go, use package `crypto/subtle`
 
-If one is not available, add your own, as used for example by NaCl: (example of `crypto_verify/16/ref/verify.c`)
+If one is not available, add your own, as used for example by [NaCl](https://nacl.cr.yp.to/verify.html):
 
 ```C
-int crypto_verify(const unsigned char *x,const unsigned char *y)
+int crypto_verify_16(const unsigned char *x,const unsigned char *y)
 {
   unsigned int differentbits = 0;
 #define F(i) differentbits |= x[i] ^ y[i];
