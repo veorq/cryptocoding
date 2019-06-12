@@ -283,15 +283,20 @@ Secret-dependent loop bounds are a special case of this problem.
 Timing leaks may be mitigated by introducing dummy operations in branches of the program in order to ensure a constant execution time. It is however more reliable to avoid branchings altogether, for example by implementing the conditional operation as a straight-line program. To select between two inputs `a` and `b` depending on a selection bit `bit`, this can be achieved with the following code:
 <!-- from E. Kasper's ECC code, listing 1 in http://static.googleusercontent.com/external_content/untrusted_dlcp/research.google.com/en//pubs/archive/37376.pdf -->
 <!-- Changed int to unsigned. The C standard guarantees that negation of an n-bit unsigned x is 2^n - x; signed integers may have other interpretations, e.g. one's complement -->
+<!-- Changed to return a when bit is non-zero, b otherwise. -->
+
 
 ```C
-unsigned select (unsigned a, unsigned b, unsigned bit) 
+/* Conditionally return a or b depending on whether bit is set */
+/* Equivalent to: return bit ? a : b */
+unsigned select (unsigned a, unsigned b, unsigned bit)
 {
-    /* -0 = 0, -1 = 0xff....ff */
-    unsigned mask = - bit;
-    unsigned ret = mask & (a^b);
-    ret = ret ^ a;
-    return ret;
+        unsigned isnonzero = (bit | -bit) >> (sizeof(unsigned) * 8 - 1);
+        /* -0 = 0, -1 = 0xff....ff */
+        unsigned mask = -isnonzero;
+        unsigned ret = mask & (b^a);
+        ret = ret ^ b;
+        return ret;
 }
 ```
 
