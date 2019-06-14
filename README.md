@@ -48,6 +48,9 @@ Table of Contents
          * [Problem](#problem-9)
          * [Bad solutions](#bad-solutions-1)
          * [Solution](#solution-9)
+      * [Always typecast shifted values](#always-typecast-shifted-values)
+         * [Problem](#problem-10)
+         * [Solution](#solution-10)
 
 
 
@@ -760,3 +763,71 @@ int main()
     return 0;
 }
 ```
+
+## Always typecast shifted values
+
+### Problem
+
+Most cryptographic hash functions, such as SHA-1 and the SHA-2 family, combine
+their input bytes into larger "word-sized" integers before processing. In C it
+is usually done with the bitwise-left shift operator `<<`.
+
+The left-shift behaviour can be undefined when the shifted value is signed.
+Because of the integer promotion rule, unsigned operand like `uint8_t` may be
+promoted to `signed int` and trigger the problem.
+
+Here is a simple example where the `combine` function create a 32-bit unsigned
+integer given four bytes:
+
+```C
+#include <limits.h>
+#include <stdint.h>
+#include <stdio.h>
+
+uint32_t
+combine(uint8_t hh, uint8_t h, uint8_t l, uint8_t ll)
+{
+	return (hh << 24) | (h << 16) | (l << 8) | ll;
+}
+
+int
+main(void)
+{
+	uint32_t combined = combine(/* 128 */0x80, 0xaa, 0xbb, 0xcc);
+	printf("combined=0x%x\n", combined);
+	printf("INT_MAX=%d\n", INT_MAX);
+	return 0;
+}
+```
+
+When compiled with `clang-4.0 -fsanitize=undefined shift.c` the resulting
+program's output is:
+
+```
+shift.c:8:13: runtime error: left shift of 128 by 24 places cannot be represented in type 'int'
+combined=0x80aabbcc
+INT_MAX=2147483647
+```
+
+Here `hh`, an `uint8_t`, is promoted to `signed int` in the expression
+`hh << 24`. Because `128 * (2 ^ 24) = 2147483648` is greater than `INT_MAX`,
+the result cannot be represented as a `signed int` and the behaviour is undefined.
+
+This exact problem can be found in the
+[demonstration implementation of SHA-1 in rfc3174](https://tools.ietf.org/html/rfc3174).
+
+### Solution
+
+Explicitly cast the shifted operand to the resulting type. For example, the
+`combine` function can be rewritten as:
+
+```C
+uint32_t
+combine(uint8_t hh, uint8_t h, uint8_t l, uint8_t ll)
+{
+	return ((uint32_t)hh << 24) | ((uint32_t)h << 16) | ((uint32_t)l << 8) | ll;
+}
+```
+
+Note that even `l` (shifted from 8 bits) need to be cast, as the minimum
+requirement for `INT_MAX` is `32767`.
