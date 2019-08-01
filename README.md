@@ -692,6 +692,41 @@ nodevrandom:
 }
 ```
 
+On Windows, when using the Microsoft C compiler, [rand_s](https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/rand-s?view=vs-2019) can be used to generate 32 bits of cryptographically secure data:
+
+```C
+#include <string.h>
+
+#define _CRT_RAND_S
+#include <stdlib.h>
+
+int randombytes(unsigned char *out, size_t outlen) {
+    size_t wordlen = sizeof(unsigned int);
+    size_t fullwordslen = (outlen / wordlen) * wordlen;
+    size_t taillen = outlen - fullwordslen;
+
+    for (size_t i = 0; i < fullwordslen; i += wordlen) {
+        unsigned int randword;
+
+        if (rand_s(&randword))
+            return -1;
+
+	memcpy(&out[i], &randword, wordlen);
+    }
+
+    if (taillen) {
+        unsigned int randword;
+
+        if (rand_s(&randword))
+            return -1;
+
+        memcpy(&out[fullwordslen], &randword, taillen);
+    }
+
+    return 0;
+}
+```
+
 On recent Windows platforms, [BCryptGenRandom](https://docs.microsoft.com/en-us/windows/desktop/api/bcrypt/nf-bcrypt-bcryptgenrandom) (nothing to do with the password hash bcrypt) should be used to generate cryptographically secure data. Its interface is straightforward:
 
 ```C
