@@ -537,7 +537,13 @@ system the increased exposure can cause previously harmless vulnerabilities to e
 
 Clear all variables containing secret data before they go out of scope. Worry about `mmap()`: executing `munmap()` causes memory to go out of scope immediately, while erasing while the mapping exists will destroy the file.
 
-For clearing memory or destroying objects that are about to go out of scope, use a platform-specific memory-wipe function where available, such as `SecureZeroMemory()` on win32, or `OPENSSL_cleanse()` on OpenSSL.
+For clearing memory or destroying objects that are about to go out of scope, use a platform-specific memory-wipe function where available, for example:
+
+- `memset_s`: part of C11 (see above);
+- `explicit_bzero`: [OpenBSD](https://man.openbsd.org/explicit_bzero) extension, also on [FreeBSD](https://www.freebsd.org/cgi/man.cgi?explicit_bzero) and [glibc](http://man7.org/linux/man-pages/man3/bzero.3.html);
+- `SecureZeroMemory()` on [Windows](https://docs.microsoft.com/en-us/previous-versions/windows/desktop/legacy/aa366877(v=vs.85));
+- `sodium_memzero()` in [libsodium](https://download.libsodium.org/doc/memory_management);
+- `OPENSSL_cleanse()` in OpenSSL.
 
 A portable C solution, for non-buggy compilers, follows:
 
@@ -589,6 +595,7 @@ Minimize the need for randomness through design and choice of primitives (for ex
 
 On Linux, use the [`getrandom()`](http://man7.org/linux/man-pages/man2/getrandom.2.html) system call, which ensures that the underlying PRNG has a high enough level entropy but will not "block" afterwards.
 On OpenBSD, use [`getentropy()`](https://man.openbsd.org/getentropy.2), which has a similar behavior and predates Linux' syscall.
+On FreeBSD 12 and newer, both [`getrandom()`](https://www.freebsd.org/cgi/man.cgi?getrandom) and [`getentropy()`](https://www.freebsd.org/cgi/man.cgi?query=getentropy&sektion=3&apropos=0&manpath=FreeBSD+12.0-RELEASE+and+Ports) are available. Older versions only have the `KERN_ARND` `sysctl`.	
 
 The OpenSSL API offers [`RAND_bytes()`](https://www.openssl.org/docs/man1.0.2/man3/RAND_bytes.html), which behaves differently depending on the platform and attempts to use reliable source of entropy when available. For example, on a Unix platform it would use `/dev/urandom` and the RDRAND/RDSEED instructions, if available, among others.
 
@@ -600,7 +607,7 @@ Follow the recommendations from Nadia Heninger et al. in Section 7 of their [Min
 
 On Intel CPUs based on the Ivy Bridge microarchitecture (and future generations), the [built-in PRNG](http://software.intel.com/en-us/articles/intel-digital-random-number-generator-drng-software-implementation-guide) guarantees high entropy and throughput.
 
-On Unix systems, if no reliable syscall is available, you should generally use `/dev/random` or `/dev/urandom`. However the former is "blocking", meaning that it won't return any data when it deems that its entropy pool contains insufficient entropy. This feature limits its usability, and is the reason why `/dev/urandom` is more often used. Extracting a random number from `/dev/urandom` can be as simple as
+On Unix systems, if no reliable syscall is available, you should generally use `/dev/random` or `/dev/urandom`. However on Linux, the former is "blocking", meaning that it won't return any data when it deems that its entropy pool contains insufficient entropy. This feature limits its usability, and is the reason why `/dev/urandom` is more often used. Extracting a random number from `/dev/urandom` can be as simple as
 
 ```C
 #include <sys/types.h>
