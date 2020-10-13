@@ -581,7 +581,7 @@ For cryptographic applications,
 * Do not design your own PRNG, even if it's based on a secure cryptographic primitive (unless you know what you're doing).
 * Do not reuse the same randomness accross applications to "save" random numbers.
 * Do not conclude that a PRNG is secure just because it passes the [Diehard](http://www.stat.fsu.edu/pub/diehard/) tests or [NIST's tests](http://csrc.nist.gov/groups/ST/toolkit/rng/stats_tests.html).
-* Do not assume that a cryptographically secure PRNG necessarily provides forward or backward secrecy (aka [backtracking resistance and prediction resistance](http://csrc.nist.gov/publications/nistpubs/800-90A/SP800-90A.pdf), would the internal state leak to an attacker.
+* Do not assume that a cryptographically secure PRNG necessarily provides forward or backward secrecy (aka [backtracking resistance and prediction resistance](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-90Ar1.pdf), would the internal state leak to an attacker.
 * Do not directly use "entropy" as pseudorandom data (entropy from analog sources is often biased, that is, N bits from an entropy pool often provide less than N bits of entropy).
 
 ### Solution
