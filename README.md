@@ -594,7 +594,7 @@ For cryptographic applications,
 Minimize the need for randomness through design and choice of primitives (for example [Ed25519](http://ed25519.cr.yp.to/) produces signatures deterministically).
 
 On Linux, use the [`getrandom()`](http://man7.org/linux/man-pages/man2/getrandom.2.html) system call, which ensures that the underlying PRNG has a high enough level entropy but will not "block" afterwards.
-On OpenBSD, use [`getentropy()`](https://man.openbsd.org/getentropy.2), which has a similar behavior and predates Linux' syscall.
+On OpenBSD, uze ['arc4random()'](https://man.openbsd.org/arc4random.3), which is a ChaCha20-based PRNG that calls `getentropy()` for its initial seed. Use this for large amounts of cryptographically-secure randomness. [`getentropy()`](https://man.openbsd.org/getentropy.2) has a 256-byte limit per call and is suitable for scenarios such as seeding PRNGs.
 On FreeBSD 12 and newer, both [`getrandom()`](https://www.freebsd.org/cgi/man.cgi?getrandom) and [`getentropy()`](https://www.freebsd.org/cgi/man.cgi?query=getentropy&sektion=3&apropos=0&manpath=FreeBSD+12.0-RELEASE+and+Ports) are available. Older versions only have the `KERN_ARND` `sysctl`.	
 
 The OpenSSL API offers [`RAND_bytes()`](https://www.openssl.org/docs/man1.0.2/man3/RAND_bytes.html), which behaves differently depending on the platform and attempts to use reliable source of entropy when available. For example, on a Unix platform it would use `/dev/urandom` and the RDRAND/RDSEED instructions, if available, among others.
