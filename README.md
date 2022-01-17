@@ -529,9 +529,7 @@ In languages with signed and unsigned byte types, implementations should always 
 
 ### Problem
 
-On most operating systems memory owned by one process can be reused by another without being cleared, either because the first process terminates or it gives back the memory to the system. If the memory
-contains secret keys these will be available to the second process, which increases the exposure of the key. On multiuser systems this can make it possible to sniff keys from other users.  Even within a single
-system the increased exposure can cause previously harmless vulnerabilities to expose secret material.
+Process memory can be unintentionally accessed by another process when — process is crashed and core dumped (by accessing the [core dump file](https://wiki.archlinux.org/title/Core_dump)), process memory is swapped (by accessing swap partition), by exploiting a kernel bug or a [bug in the process itself](https://en.wikipedia.org/wiki/Heartbleed), or by some legitimate methods — such as process tracing, or other debugging facilities. Also, hardware methods such as [DMA attack](https://en.wikipedia.org/wiki/DMA_attack), [cold boot attack](https://en.wikipedia.org/wiki/Cold_boot_attack), [Spectre vulnerability](https://en.wikipedia.org/wiki/Spectre_(security_vulnerability)), etc.
 
 ### Solution
 
